@@ -2,38 +2,32 @@ require("dotenv").config();
 
 const express = require("express");
 const mongoose = require("mongoose");
-
-// Models
-const User = require("./Models/user.js");
-const Feedback = require("./Models/Feedback.js");
-const Complaint = require("./Models/Complaint.js");
-
-// Routes
-const userRouter = require("./Routes/userRoute.js");
-const compRouter = require("./Routes/complaintRoute.js");
-const feedBackRouter = require("./Routes/feedBackRoute.js");
-const AnnounceRouter = require("./Routes/AnnounceRoute.js");
-const staffRouter = require("./Routes/staffRoute.js");
-const studentRouter = require("./Routes/studentRoute.js");
-
+const cors = require("cors");
 
 const app = express();
 
 /* ---------------- MIDDLEWARE ---------------- */
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-/* ---------------- MIDDLEWARE ---------------- */
-// Allow frontend (Vite) to call the API during development.
-const cors = require("cors");
-const corsOptions = {
-  origin: true, // allow requests from any origin
-  methods: ["GET", "POST", "PATCH", "PUT", "DELETE", "OPTIONS"],
-  credentials: true,
-};
-app.use(cors(corsOptions));
+app.use(
+  cors({
+    origin: true,
+    credentials: true,
+    methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+  })
+);
 
 /* ---------------- ROUTES ---------------- */
+
+const userRouter = require("./Routes/userRoute");
+const compRouter = require("./Routes/complaintRoute");
+const feedBackRouter = require("./Routes/feedBackRoute");
+const AnnounceRouter = require("./Routes/AnnounceRoute");
+const staffRouter = require("./Routes/staffRoute");
+const studentRouter = require("./Routes/studentRoute");
+
 app.use("/v1/api", userRouter);
 app.use("/v1/api/complaints", compRouter);
 app.use("/v1/api", feedBackRouter);
@@ -41,33 +35,38 @@ app.use("/v1/api", AnnounceRouter);
 app.use("/v1/api/staff", staffRouter);
 app.use("/v1/api/students", studentRouter);
 
-/* ---------------- DB CONNECTION ---------------- */
+/* ---------------- DATABASE ---------------- */
+
+let isConnected = false;
 
 async function connectDB() {
+  if (isConnected) return;
+
   try {
     await mongoose.connect(process.env.MONGO_URL);
-    console.log("✅ Database connected successfully");
-    isConnected=false
+
+    console.log("✅ MongoDB Connected");
+
+    isConnected = true;
   } catch (err) {
-    console.log("❌ DB connection error:", err);
+    console.error(err);
   }
 }
 
+app.use(async (req, res, next) => {
+  await connectDB();
+  next();
+});
 
+/* ---------------- TEST ROUTE ---------------- */
 
-app.use((req,res,next)=>{
-  if(!isConnected){
-    connectDB()
-  }
-  next()
-})
+app.get("/", (req, res) => {
+  res.json({
+    success: true,
+    message: "Backend Running Successfully 🚀",
+  });
+});
 
-/* ---------------- SERVER ---------------- */
-// const PORT = process.env.PORT || 4000;
+/* ---------------- EXPORT ---------------- */
 
-// app.listen(PORT, () => {
-//   console.log(`🚀 S erver running on port ${PORT}`);
-// });
-
-module.exports=app
-
+module.exports = app;
