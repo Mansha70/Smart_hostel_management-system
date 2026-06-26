@@ -1,7 +1,12 @@
 import { getToken } from '@/lib/authStorage';
 import type { JsonRecord } from '@/lib/apiTypes';
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:4000/v1/api';
+// Uses Vercel-friendly backend URL.
+// - In production you can set VITE_API_BASE_URL to override.
+// - Otherwise it defaults to your deployed backend.
+const API_BASE_URL =
+  import.meta.env.VITE_API_BASE_URL ||
+  'https://hostelbackend-lake.vercel.app/v1/api';
 
 function withAuthHeaders(headers: Record<string, string> = {}) {
   const token = getToken();
