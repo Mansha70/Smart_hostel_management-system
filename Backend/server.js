@@ -47,17 +47,27 @@ async function connectDB() {
   try {
     await mongoose.connect(process.env.MONGO_URL);
     console.log("✅ Database connected successfully");
+    isConnected=true
   } catch (err) {
     console.log("❌ DB connection error:", err);
   }
 }
 
-connectDB();
+
+
+app.use((req,res,next)=>{
+  if(!isConnected){
+    connectDB()
+  }
+  next()
+})
 
 /* ---------------- SERVER ---------------- */
-const PORT = process.env.PORT || 4000;
+// const PORT = process.env.PORT || 4000;
 
-app.listen(PORT, () => {
-  console.log(`🚀 Server running on port ${PORT}`);
-});
+// app.listen(PORT, () => {
+//   console.log(`🚀 S erver running on port ${PORT}`);
+// });
+
+module.exports=app
 
