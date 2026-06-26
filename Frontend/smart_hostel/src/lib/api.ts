@@ -6,7 +6,7 @@ import type { JsonRecord } from '@/lib/apiTypes';
 // - Otherwise it defaults to your deployed backend.
 const API_BASE_URL =
   import.meta.env.VITE_API_BASE_URL ||
-  'https://hostelbackend-lake.vercel.app/v1/api';
+  'https://hostelbackend-lake.vercel.app';
 
 function withAuthHeaders(headers: Record<string, string> = {}) {
   const token = getToken();
